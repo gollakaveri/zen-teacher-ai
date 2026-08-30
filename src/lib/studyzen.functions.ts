@@ -234,8 +234,8 @@ export const makeNotes = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     if (!lesson) throw new Error("Lesson not found.");
 
-    const transcript = (Array.isArray(lesson.turns) ? lesson.turns : [])
-      .map((t: { role: string; text: string }) => `${t.role}: ${t.text}`)
+    const transcript = ((Array.isArray(lesson.turns) ? lesson.turns : []) as { role?: string; text?: string }[])
+      .map((t) => `${t?.role ?? ""}: ${t?.text ?? ""}`)
       .join("\n");
 
     const notes = await generateNotes({
