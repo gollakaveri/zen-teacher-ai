@@ -75,7 +75,9 @@ export const savePreferences = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await loadProfile(context.supabase, context.userId);
-    const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
+    const patch: { updated_at: string; language?: string; display_name?: string } = {
+      updated_at: new Date().toISOString(),
+    };
     if (data.language) patch.language = data.language;
     if (data.displayName !== undefined) patch.display_name = data.displayName;
     const { error } = await context.supabase.from("profiles").update(patch).eq("id", context.userId);
