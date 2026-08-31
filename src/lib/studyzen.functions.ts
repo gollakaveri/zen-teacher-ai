@@ -259,3 +259,70 @@ export const makeNotes = createServerFn({ method: "POST" })
 
     return { blocked: false as const, notes, id: saved.id as string };
   });
+
+export const listLessons = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("lessons")
+      .select("id, topic, subject, language, created_at, updated_at, turns")
+      .eq("user_id", context.userId)
+      .order("updated_at", { ascending: false })
+      .limit(60);
+    if (error) throw new Error(error.message);
+    return (data ?? []).map((l: Record<string, unknown>) => ({
+      id: l["id"] as string,
+      topic: l["topic"] as string,
+      subject: (l["subject"] as string) ?? null,
+      language: l["language"] as string,
+      updatedAt: l["updated_at"] as string,
+      turnCount: Array.isArray(l["turns"]) ? (l["turns"] as unknown[]).length : 0,
+    }));
+  });
+
+export const getLesson = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: lesson, error } = await context.supabase
+      .from("lessons")
+      .select("id, topic, subject, language, turns")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!lesson) throw new Error("Lesson not found.");
+    const row = lesson as {
+      id: string;
+      topic: string;
+      subject: string | null;
+      language: string;
+      turns: unknown;
+    };
+    return {
+      id: row.id,
+      topic: row.topic,
+      subject: row.subject,
+      language: row.language,
+      turns: JSON.stringify(Array.isArray(row.turns) ? row.turns : []),
+    };
+  });
+
+export const listNotes = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("notes")
+      .select("id, topic, language, content, created_at, lesson_id")
+      .eq("user_id", context.userId)
+      .order("created_at", { ascending: false })
+      .limit(60);
+    if (error) throw new Error(error.message);
+    return (data ?? []).map((n: Record<string, unknown>) => ({
+      id: n["id"] as string,
+      topic: n["topic"] as string,
+      language: n["language"] as string,
+      createdAt: n["created_at"] as string,
+      lessonId: (n["lesson_id"] as string) ?? null,
+      content: JSON.stringify(n["content"] ?? {}),
+    }));
+  });
