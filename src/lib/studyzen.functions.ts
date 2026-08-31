@@ -271,12 +271,12 @@ export const listLessons = createServerFn({ method: "GET" })
       .limit(60);
     if (error) throw new Error(error.message);
     return (data ?? []).map((l: Record<string, unknown>) => ({
-      id: l.id as string,
-      topic: l.topic as string,
-      subject: (l.subject as string) ?? null,
-      language: l.language as string,
-      updatedAt: l.updated_at as string,
-      turnCount: Array.isArray(l.turns) ? l.turns.length : 0,
+      id: l["id"] as string,
+      topic: l["topic"] as string,
+      subject: (l["subject"] as string) ?? null,
+      language: l["language"] as string,
+      updatedAt: l["updated_at"] as string,
+      turnCount: Array.isArray(l["turns"]) ? (l["turns"] as unknown[]).length : 0,
     }));
   });
 
@@ -291,12 +291,19 @@ export const getLesson = createServerFn({ method: "POST" })
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!lesson) throw new Error("Lesson not found.");
-    return lesson as {
+    const row = lesson as {
       id: string;
       topic: string;
       subject: string | null;
       language: string;
-      turns: unknown[];
+      turns: unknown;
+    };
+    return {
+      id: row.id,
+      topic: row.topic,
+      subject: row.subject,
+      language: row.language,
+      turns: JSON.stringify(Array.isArray(row.turns) ? row.turns : []),
     };
   });
 
