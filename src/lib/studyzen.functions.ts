@@ -317,5 +317,12 @@ export const listNotes = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false })
       .limit(60);
     if (error) throw new Error(error.message);
-    return data ?? [];
+    return (data ?? []).map((n: Record<string, unknown>) => ({
+      id: n["id"] as string,
+      topic: n["topic"] as string,
+      language: n["language"] as string,
+      createdAt: n["created_at"] as string,
+      lessonId: (n["lesson_id"] as string) ?? null,
+      content: JSON.stringify(n["content"] ?? {}),
+    }));
   });
