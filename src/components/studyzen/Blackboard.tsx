@@ -56,10 +56,7 @@ export function Blackboard({
   language: "en" | "te";
 }) {
   return (
-    <section
-      className="relative flex h-full min-h-[28rem] flex-col rounded-3xl border-[10px] border-[#4a3career]/0 p-0"
-      aria-label="Digital blackboard"
-    >
+    <section className="relative flex h-full min-h-[28rem] flex-col" aria-label="Digital blackboard">
       <div className="flex h-full flex-col rounded-2xl border-[10px] border-[oklch(0.36_0.05_60)] bg-board shadow-[inset_0_0_120px_rgba(0,0,0,0.6)]">
         <header className="flex items-center justify-between border-b border-board-chalk/20 px-6 py-4">
           <div>
