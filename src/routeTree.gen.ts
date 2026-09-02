@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedClassroomRouteImport } from './routes/_authenticated/classroom'
 import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated/history'
 import { Route as AuthenticatedNotesRouteImport } from './routes/_authenticated/notes'
+import { Route as AuthenticatedProRouteImport } from './routes/_authenticated/pro'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 
 const IndexRoute = IndexRouteImport.update({
@@ -46,6 +47,11 @@ const AuthenticatedNotesRoute = AuthenticatedNotesRouteImport.update({
   path: '/notes',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedProRoute = AuthenticatedProRouteImport.update({
+  id: '/pro',
+  path: '/pro',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -58,6 +64,7 @@ export interface FileRoutesByFullPath {
   '/classroom': typeof AuthenticatedClassroomRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/notes': typeof AuthenticatedNotesRoute
+  '/pro': typeof AuthenticatedProRoute
   '/profile': typeof AuthenticatedProfileRoute
 }
 export interface FileRoutesByTo {
@@ -66,6 +73,7 @@ export interface FileRoutesByTo {
   '/classroom': typeof AuthenticatedClassroomRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/notes': typeof AuthenticatedNotesRoute
+  '/pro': typeof AuthenticatedProRoute
   '/profile': typeof AuthenticatedProfileRoute
 }
 export interface FileRoutesById {
@@ -76,13 +84,15 @@ export interface FileRoutesById {
   '/_authenticated/classroom': typeof AuthenticatedClassroomRoute
   '/_authenticated/history': typeof AuthenticatedHistoryRoute
   '/_authenticated/notes': typeof AuthenticatedNotesRoute
+  '/_authenticated/pro': typeof AuthenticatedProRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/classroom' | '/history' | '/notes' | '/profile'
+  fullPaths:
+    '/' | '/auth' | '/classroom' | '/history' | '/notes' | '/pro' | '/profile'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/classroom' | '/history' | '/notes' | '/profile'
+  to: '/' | '/auth' | '/classroom' | '/history' | '/notes' | '/pro' | '/profile'
   id:
     | '__root__'
     | '/'
@@ -91,6 +101,7 @@ export interface FileRouteTypes {
     | '/_authenticated/classroom'
     | '/_authenticated/history'
     | '/_authenticated/notes'
+    | '/_authenticated/pro'
     | '/_authenticated/profile'
   fileRoutesById: FileRoutesById
 }
@@ -144,6 +155,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedNotesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/pro': {
+      id: '/_authenticated/pro'
+      path: '/pro'
+      fullPath: '/pro'
+      preLoaderRoute: typeof AuthenticatedProRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/profile': {
       id: '/_authenticated/profile'
       path: '/profile'
@@ -158,6 +176,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedClassroomRoute: typeof AuthenticatedClassroomRoute
   AuthenticatedHistoryRoute: typeof AuthenticatedHistoryRoute
   AuthenticatedNotesRoute: typeof AuthenticatedNotesRoute
+  AuthenticatedProRoute: typeof AuthenticatedProRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
 }
 
@@ -165,6 +184,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedClassroomRoute: AuthenticatedClassroomRoute,
   AuthenticatedHistoryRoute: AuthenticatedHistoryRoute,
   AuthenticatedNotesRoute: AuthenticatedNotesRoute,
+  AuthenticatedProRoute: AuthenticatedProRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
 }
 
