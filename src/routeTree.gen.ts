@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedClassroomRouteImport } from './routes/_authenticated/classroom'
+import { Route as AuthenticatedNotesRouteImport } from './routes/_authenticated/notes'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -33,16 +34,23 @@ const AuthenticatedClassroomRoute = AuthenticatedClassroomRouteImport.update({
   path: '/classroom',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedNotesRoute = AuthenticatedNotesRouteImport.update({
+  id: '/notes',
+  path: '/notes',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/classroom': typeof AuthenticatedClassroomRoute
+  '/notes': typeof AuthenticatedNotesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/classroom': typeof AuthenticatedClassroomRoute
+  '/notes': typeof AuthenticatedNotesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -50,14 +58,20 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/classroom': typeof AuthenticatedClassroomRoute
+  '/_authenticated/notes': typeof AuthenticatedNotesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/classroom'
+  fullPaths: '/' | '/auth' | '/classroom' | '/notes'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/classroom'
+  to: '/' | '/auth' | '/classroom' | '/notes'
   id:
-    '__root__' | '/' | '/_authenticated' | '/auth' | '/_authenticated/classroom'
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/classroom'
+    | '/_authenticated/notes'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -96,15 +110,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClassroomRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/notes': {
+      id: '/_authenticated/notes'
+      path: '/notes'
+      fullPath: '/notes'
+      preLoaderRoute: typeof AuthenticatedNotesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedClassroomRoute: typeof AuthenticatedClassroomRoute
+  AuthenticatedNotesRoute: typeof AuthenticatedNotesRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedClassroomRoute: AuthenticatedClassroomRoute,
+  AuthenticatedNotesRoute: AuthenticatedNotesRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
