@@ -114,6 +114,7 @@ export const teach = createServerFn({ method: "POST" })
       .object({
         message: z.string().min(1).max(2000),
         language: languageSchema,
+        boardLanguage: languageSchema.optional(),
         intent: intentSchema,
         lessonId: z.string().uuid().nullable().optional(),
         topic: z.string().max(200).nullable().optional(),
@@ -138,6 +139,7 @@ export const teach = createServerFn({ method: "POST" })
     try {
       turn = await teachTurn({
         language: data.language,
+        boardLanguage: data.boardLanguage ?? data.language,
         intent: data.intent,
         message: data.message,
         history: data.history,
@@ -324,5 +326,38 @@ export const listNotes = createServerFn({ method: "GET" })
       createdAt: n["created_at"] as string,
       lessonId: (n["lesson_id"] as string) ?? null,
       content: JSON.stringify(n["content"] ?? {}),
+    }));
+  });
+
+export const toggleBookmark = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ lessonId: z.string().uuid(), value: z.boolean() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("lessons")
+      .update({ bookmarked: data.value })
+      .eq("id", data.lessonId)
+      .eq("user_id", context.userId);
+    if (error) throw new Error(error.message);
+    return { ok: true, bookmarked: data.value };
+  });
+
+export const listBookmarks = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("lessons")
+      .select("id, topic, subject, language, updated_at")
+      .eq("user_id", context.userId)
+      .eq("bookmarked", true)
+      .order("updated_at", { ascending: false })
+      .limit(60);
+    if (error) throw new Error(error.message);
+    return (data ?? []).map((l: Record<string, unknown>) => ({
+      id: l["id"] as string,
+      topic: l["topic"] as string,
+      subject: (l["subject"] as string) ?? null,
+      language: l["language"] as string,
+      updatedAt: l["updated_at"] as string,
     }));
   });

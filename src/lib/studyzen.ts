@@ -65,7 +65,7 @@ export type PlanState = {
   trialEndsAt: string | null;
 };
 
-export const FREE_DAILY_QUESTIONS = 3;
+export const FREE_DAILY_QUESTIONS = 5;
 
 export type StudentIntent =
   | "new_question"

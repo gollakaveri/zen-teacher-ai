@@ -207,3 +207,28 @@
 @utility animate-glow {
   animation: sz-glow 1.8s ease-out infinite;
 }
+
+@keyframes sz-teach-sway {
+  0%, 100% { transform: translateX(-0.6%) rotate(-0.5deg); }
+  50% { transform: translateX(0.6%) rotate(0.5deg); }
+}
+
+@keyframes sz-teach-nod {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  35% { transform: translateY(-0.5%) rotate(0.35deg); }
+  70% { transform: translateY(0.4%) rotate(-0.3deg); }
+}
+
+@keyframes sz-chalk-write {
+  from { opacity: 0; clip-path: inset(0 100% 0 0); transform: translateY(4px); }
+  to { opacity: 1; clip-path: inset(0 0 0 0); transform: none; }
+}
+
+@utility animate-chalk {
+  animation: sz-chalk-write 0.7s ease-out both;
+}
+
+@utility font-chalk {
+  font-family: "Caveat", "Segoe Print", ui-rounded, cursive;
+  letter-spacing: 0.01em;
+}

@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       lessons: {
         Row: {
+          bookmarked: boolean
           created_at: string
           id: string
           language: string
@@ -26,6 +27,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          bookmarked?: boolean
           created_at?: string
           id?: string
           language?: string
@@ -36,6 +38,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          bookmarked?: boolean
           created_at?: string
           id?: string
           language?: string

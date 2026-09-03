@@ -102,7 +102,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", href: "/favicon.png", type: "image/png" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Outfit:wght@300..700&family=Sora:wght@500..700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Outfit:wght@300..700&family=Sora:wght@500..700&family=Caveat:wght@500;700&display=swap",
       },
     ],
   }),
