@@ -12,3 +12,11 @@
 - [ ] Bookmarks page + nav
 - [ ] Mobile responsive classroom stacking
 - [ ] Final verification pass
+
+## New requests (Sep 4)
+- [ ] Teacher must visibly talk: mouth animation synced to voice start/stop
+- [ ] Teacher hands/arms gesture variety + points at board + head/body motion
+- [ ] Teacher LEFT / board RIGHT always side by side, responsive
+- [ ] Board draws diagrams: flowcharts, boxes, arrows, labels, graphs
+- [ ] Teacher + voice + board synchronized as one system
+- [x] Notes free for everyone (Pro lock removed)
