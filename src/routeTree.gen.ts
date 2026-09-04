@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedBookmarksRouteImport } from './routes/_authenticated/bookmarks'
 import { Route as AuthenticatedClassroomRouteImport } from './routes/_authenticated/classroom'
 import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated/history'
 import { Route as AuthenticatedNotesRouteImport } from './routes/_authenticated/notes'
@@ -31,6 +32,11 @@ const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedBookmarksRoute = AuthenticatedBookmarksRouteImport.update({
+  id: '/bookmarks',
+  path: '/bookmarks',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedClassroomRoute = AuthenticatedClassroomRouteImport.update({
   id: '/classroom',
@@ -61,6 +67,7 @@ const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/bookmarks': typeof AuthenticatedBookmarksRoute
   '/classroom': typeof AuthenticatedClassroomRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/notes': typeof AuthenticatedNotesRoute
@@ -70,6 +77,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/bookmarks': typeof AuthenticatedBookmarksRoute
   '/classroom': typeof AuthenticatedClassroomRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/notes': typeof AuthenticatedNotesRoute
@@ -81,6 +89,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/bookmarks': typeof AuthenticatedBookmarksRoute
   '/_authenticated/classroom': typeof AuthenticatedClassroomRoute
   '/_authenticated/history': typeof AuthenticatedHistoryRoute
   '/_authenticated/notes': typeof AuthenticatedNotesRoute
@@ -90,14 +99,30 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/classroom' | '/history' | '/notes' | '/pro' | '/profile'
+    | '/'
+    | '/auth'
+    | '/bookmarks'
+    | '/classroom'
+    | '/history'
+    | '/notes'
+    | '/pro'
+    | '/profile'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/classroom' | '/history' | '/notes' | '/pro' | '/profile'
+  to:
+    | '/'
+    | '/auth'
+    | '/bookmarks'
+    | '/classroom'
+    | '/history'
+    | '/notes'
+    | '/pro'
+    | '/profile'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/bookmarks'
     | '/_authenticated/classroom'
     | '/_authenticated/history'
     | '/_authenticated/notes'
@@ -133,6 +158,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/bookmarks': {
+      id: '/_authenticated/bookmarks'
+      path: '/bookmarks'
+      fullPath: '/bookmarks'
+      preLoaderRoute: typeof AuthenticatedBookmarksRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/classroom': {
       id: '/_authenticated/classroom'
@@ -173,6 +205,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedBookmarksRoute: typeof AuthenticatedBookmarksRoute
   AuthenticatedClassroomRoute: typeof AuthenticatedClassroomRoute
   AuthenticatedHistoryRoute: typeof AuthenticatedHistoryRoute
   AuthenticatedNotesRoute: typeof AuthenticatedNotesRoute
@@ -181,6 +214,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedBookmarksRoute: AuthenticatedBookmarksRoute,
   AuthenticatedClassroomRoute: AuthenticatedClassroomRoute,
   AuthenticatedHistoryRoute: AuthenticatedHistoryRoute,
   AuthenticatedNotesRoute: AuthenticatedNotesRoute,

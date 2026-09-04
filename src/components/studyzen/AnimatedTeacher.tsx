@@ -1,7 +1,7 @@
 import { Mic, Volume2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import teacher from "@/assets/teacher.jpg";
+import { TeacherAvatar, useGestureCycle } from "@/components/studyzen/TeacherAvatar";
 import { cn } from "@/lib/utils";
 import type { LanguageCode } from "@/lib/studyzen";
 
@@ -35,24 +35,28 @@ export function Waveform({ active, level = 0 }: { active: boolean; level?: numbe
 /**
  * Animated teacher stage.
  *
- * Honest capability note: no talking-head / lip-sync model is connected to this
- * project, so this is NOT model-driven lip sync. Instead the teacher's motion is
- * driven live by the real amplitude of the generated teacher voice: the mouth
- * region opens with the waveform, the head nods and sways, she breathes, blinks
- * and gestures while speaking, and everything stops when the audio stops.
+ * The teacher is a vector rig, so she genuinely moves: her mouth opens and closes
+ * with the live amplitude of the generated voice, her head nods, she blinks, her
+ * body shifts weight and BOTH arms cycle through teaching gestures — including
+ * pointing at the board when new content is written. This is amplitude-driven
+ * animation, not a lip-sync model, and it stops the moment the audio stops.
  */
 export function AnimatedTeacher({
   state,
   level,
   caption,
   language,
+  pointing = false,
 }: {
   state: TeacherState;
   level: number;
   caption: string | null;
   language: LanguageCode;
+  /** True while the board just received new content, so she points at it. */
+  pointing?: boolean;
 }) {
   const speaking = state === "speaking";
+  const gesture = useGestureCycle(speaking, pointing);
   const [blink, setBlink] = useState(false);
 
   useEffect(() => {
@@ -75,57 +79,10 @@ export function AnimatedTeacher({
 
   return (
     <div className="glass-card flex h-full flex-col overflow-hidden rounded-3xl">
-      <div className="relative aspect-[4/5] w-full overflow-hidden sm:aspect-[5/6] lg:aspect-[4/5]">
-        {/* Body / base layer: breathing + gentle sway while teaching */}
-        <div
-          className="absolute inset-0"
-          style={{
-            transformOrigin: "50% 90%",
-            transform: speaking
-              ? `translateY(${Math.sin(Date.now() / 400) * 0}px) scale(${1.01 + open * 0.006})`
-              : "none",
-            animation: speaking
-              ? "sz-teach-sway 5.5s ease-in-out infinite, sz-teach-nod 3.1s ease-in-out infinite"
-              : "sz-breathe 5.5s ease-in-out infinite",
-            transition: "transform 90ms linear",
-          }}
-        >
-          <img src={teacher} alt="Zen, your StudyZen AI teacher" className="size-full object-cover object-top" />
+      <div className="relative aspect-[4/5] w-full overflow-hidden sm:aspect-square lg:aspect-[4/5]">
+        <TeacherAvatar level={level} speaking={speaking} gesture={gesture} blink={blink} />
 
-          {/* Mouth region: stretched live by the amplitude of her voice */}
-          <img
-            src={teacher}
-            alt=""
-            aria-hidden
-            className="absolute inset-0 size-full object-cover object-top"
-            style={{
-              clipPath: "inset(46% 30% 38% 30%)",
-              transformOrigin: "50% 46%",
-              transform: `scaleY(${1 + open * 0.055}) translateY(${open * 1.2}px)`,
-              transition: "transform 70ms linear",
-              filter: `brightness(${1 - open * 0.05})`,
-            }}
-          />
-
-          {/* Eyelid blink */}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute left-[32%] right-[32%] top-[30%] h-[3.5%] rounded-full bg-black/70 transition-opacity duration-100"
-            style={{ opacity: blink ? 0.55 : 0, filter: "blur(2px)" }}
-          />
-        </div>
-
-        {/* Warm classroom light + gesture glow that pulses with speech */}
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background: speaking
-              ? `radial-gradient(60% 40% at 50% 70%, color-mix(in oklab, var(--gold) ${8 + open * 14}%, transparent), transparent 70%)`
-              : undefined,
-            transition: "background 120ms linear",
-          }}
-        />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-card to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-card to-transparent" />
 
         <div
           className={cn(

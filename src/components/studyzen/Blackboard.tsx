@@ -1,3 +1,4 @@
+import { BoardDiagram, splitBoard } from "@/components/studyzen/BoardDiagram";
 import type { BoardItem } from "@/lib/studyzen";
 import type { LanguageCode } from "@/lib/studyzen";
 import { cn } from "@/lib/utils";
@@ -79,6 +80,7 @@ export function Blackboard({
   subject: string | null;
   language: LanguageCode;
 }) {
+  const { flow, labels, text } = splitBoard(items);
   return (
     <section className="flex h-full min-h-[24rem] flex-col" aria-label="Digital blackboard">
       <div
@@ -105,7 +107,7 @@ export function Blackboard({
           </div>
         </header>
 
-        <div className="flex-1 space-y-3 overflow-y-auto px-6 py-5">
+        <div className="flex-1 overflow-y-auto px-6 py-5">
           {items.length === 0 ? (
             <p className="font-chalk text-xl text-board-chalk/60">
               {language === "te"
@@ -113,7 +115,18 @@ export function Blackboard({
                 : "Key points get written here while the teacher explains."}
             </p>
           ) : (
-            items.map((item, i) => <ChalkItem key={`${i}-${item.text}`} item={item} index={i} />)
+            <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_auto]">
+              <div className="space-y-3">
+                {text.map((item, i) => (
+                  <ChalkItem key={`${i}-${item.text}`} item={item} index={i} />
+                ))}
+              </div>
+              {flow.length >= 2 || labels.length ? (
+                <div className="md:w-[300px]">
+                  <BoardDiagram flow={flow} labels={labels} />
+                </div>
+              ) : null}
+            </div>
           )}
         </div>
       </div>

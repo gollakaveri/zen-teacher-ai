@@ -77,6 +77,7 @@ function Classroom() {
   const [blocked, setBlocked] = useState(false);
   const [plan, setPlan] = useState<PlanState | null>(null);
   const [recording, setRecording] = useState(false);
+  const [pointing, setPointing] = useState(false);
   const [notesBusy, setNotesBusy] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -187,7 +188,12 @@ function Classroom() {
       for (const segment of turn.segments) {
         if (cancelRef.current) break;
         setCaption(segment.say);
-        setBoard((prev) => [...prev, ...(segment.board ?? [])]);
+        if (segment.board?.length) {
+          setBoard((prev) => [...prev, ...segment.board]);
+          // She turns and points at what was just written on the board.
+          setPointing(true);
+          setTimeout(() => setPointing(false), 4200);
+        }
         await playSegment(segment.say);
       }
 
@@ -331,9 +337,15 @@ function Classroom() {
   const busy = state === "thinking" || state === "speaking";
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[minmax(0,430px)_minmax(0,1fr)] xl:grid-cols-[minmax(0,480px)_minmax(0,1fr)]">
+    <div className="grid grid-cols-[minmax(0,34%)_minmax(0,1fr)] gap-3 sm:gap-4 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)] xl:grid-cols-[minmax(0,440px)_minmax(0,1fr)]">
       <div className="flex flex-col gap-4">
-        <AnimatedTeacher state={state} level={level} caption={caption} language={language} />
+        <AnimatedTeacher
+          state={state}
+          level={level}
+          caption={caption}
+          language={language}
+          pointing={pointing}
+        />
 
         {blocked ? (
           <div className="glass-card rounded-3xl border-gold/40 p-5 text-center">

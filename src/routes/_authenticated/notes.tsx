@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Crown, NotebookPen } from "lucide-react";
+import { NotebookPen } from "lucide-react";
 
 import { useAccount } from "@/components/studyzen/AppShell";
 import { Button } from "@/components/ui/button";
@@ -41,30 +41,10 @@ function Section({ title, items }: { title: string; items: string[] }) {
 function NotesPage() {
   const { language } = useLanguage();
   const account = useAccount();
-  const isPro = account.data?.plan.isPro ?? false;
   const fn = useServerFn(listNotes);
-  const notes = useQuery({ queryKey: ["notes"], queryFn: () => fn(), enabled: isPro });
+  const notes = useQuery({ queryKey: ["notes"], queryFn: () => fn() });
 
   if (account.isLoading) return <p className="text-sm text-muted-foreground">Loading…</p>;
-
-  if (!isPro) {
-    return (
-      <div className="glass-card mx-auto max-w-xl rounded-3xl border-gold/40 p-8 text-center">
-        <Crown className="mx-auto size-8 text-gold" />
-        <h1 className="mt-3 text-2xl font-semibold">
-          {language === "te" ? "నోట్స్ ప్రో ఫీచర్" : "Study Notes is a Pro feature"}
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {language === "te"
-            ? "మీ పాఠాల నుండి పరీక్షలకు సిద్ధంగా ఉండే నోట్స్ — నిర్వచనాలు, సూత్రాలు, ఉదాహరణలు, రివిజన్."
-            : "Turn every lesson into clean, exam-ready notes — definitions, formulas, worked examples, flow and revision lists. Not a copy of the chat."}
-        </p>
-        <Button asChild className="mt-5">
-          <Link to="/pro">Try Pro for 2 days — ₹2</Link>
-        </Button>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-4">

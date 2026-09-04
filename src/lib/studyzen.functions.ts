@@ -226,7 +226,6 @@ export const makeNotes = createServerFn({ method: "POST" })
     const { generateNotes } = await import("@/lib/teacher.server");
     const profile = await loadProfile(context.supabase, context.userId);
     const state = planStateOf(profile);
-    if (!state.isPro) return { blocked: true as const };
 
     const { data: lesson, error } = await context.supabase
       .from("lessons")
