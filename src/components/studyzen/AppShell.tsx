@@ -16,6 +16,7 @@ const NAV = [
   { to: "/classroom", label: { en: "Classroom", te: "క్లాస్‌రూమ్" } },
   { to: "/notes", label: { en: "Notes", te: "నోట్స్" } },
   { to: "/history", label: { en: "History", te: "చరిత్ర" } },
+  { to: "/bookmarks", label: { en: "Bookmarks", te: "బుక్‌మార్క్‌లు" } },
   { to: "/profile", label: { en: "Profile", te: "ప్రొఫైల్" } },
 ] as const;
 
@@ -25,7 +26,7 @@ export function useAccount() {
 }
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const { language, setLanguage } = useLanguage();
+  const { language, boardLanguage, setLanguage, setBoardLanguage, applyTeluguTeachingEnglishBoard } = useLanguage();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -54,21 +55,52 @@ export function AppShell({ children }: { children: ReactNode }) {
           </nav>
 
           <div className="ml-auto flex items-center gap-2">
-            <div className="flex rounded-full border border-border/70 p-0.5">
-              {LANGUAGES.map((l) => (
-                <button
-                  key={l.code}
-                  onClick={() => setLanguage(l.code)}
-                  className={cn(
-                    "rounded-full px-3 py-1 text-xs font-medium transition-colors",
-                    language === l.code
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  {l.native}
-                </button>
-              ))}
+            <div className="flex items-center gap-1.5">
+              <span className="hidden text-[10px] uppercase tracking-wider text-muted-foreground xl:inline">
+                Voice
+              </span>
+              <div className="flex rounded-full border border-border/70 p-0.5">
+                {LANGUAGES.map((l) => (
+                  <button
+                    key={l.code}
+                    onClick={() => setLanguage(l.code)}
+                    className={cn(
+                      "rounded-full px-2.5 py-1 text-xs font-medium transition-colors",
+                      language === l.code
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    {l.native}
+                  </button>
+                ))}
+              </div>
+              <span className="hidden text-[10px] uppercase tracking-wider text-muted-foreground xl:inline">
+                Board
+              </span>
+              <div className="flex rounded-full border border-border/70 p-0.5">
+                {LANGUAGES.map((l) => (
+                  <button
+                    key={l.code}
+                    onClick={() => setBoardLanguage(l.code)}
+                    className={cn(
+                      "rounded-full px-2.5 py-1 text-xs font-medium transition-colors",
+                      boardLanguage === l.code
+                        ? "bg-gold text-background"
+                        : "text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    {l.native}
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={applyTeluguTeachingEnglishBoard}
+                className="hidden rounded-full border border-border/70 px-2.5 py-1 text-[11px] text-muted-foreground transition-colors hover:text-foreground 2xl:inline-block"
+                title="Telugu teaching + English board"
+              >
+                తెలుగు + English board
+              </button>
             </div>
 
             {plan ? (
