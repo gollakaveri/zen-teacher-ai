@@ -20,3 +20,17 @@
 - [ ] Board draws diagrams: flowcharts, boxes, arrows, labels, graphs
 - [ ] Teacher + voice + board synchronized as one system
 - [x] Notes free for everyone (Pro lock removed)
+
+## New brief (Sep 5) — professional pass
+- [ ] Remove Pro/premium everywhere (badges, upgrade pages, trial, daily limits)
+- [ ] Beautiful, professional AI teacher character (same identity everywhere)
+- [ ] Natural, non-random teacher animation (mouth, blink, head, hands, pointing)
+- [ ] Clearer, slower, well-paced teacher voice with pauses
+- [ ] Simple English teaching style
+- [ ] Cleaner digital board (short points, keywords, formulas, code, diagrams)
+- [ ] Teacher left / board right balanced layout, responsive
+- [ ] Fix and harden login/signup/logout, session persistence, friendly errors
+- [ ] Complete profile page (avatar, edit, password, progress, activity, logout)
+- [ ] Student dashboard (welcome, continue learning, stats, recent activity)
+- [ ] New professional StudyZen logo + favicon everywhere
+- [ ] Consistent design, loading + error states, full journey test
