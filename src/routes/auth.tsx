@@ -38,7 +38,7 @@ function AuthPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && session) navigate({ to: "/classroom", replace: true });
+    if (!loading && session) navigate({ to: "/dashboard", replace: true });
   }, [session, loading, navigate]);
 
   async function submit(e: React.FormEvent) {
@@ -50,7 +50,7 @@ function AuthPage() {
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/classroom`,
+            emailRedirectTo: `${window.location.origin}/dashboard`,
             data: { display_name: name },
           },
         });
@@ -60,7 +60,7 @@ function AuthPage() {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       }
-      navigate({ to: "/classroom", replace: true });
+      navigate({ to: "/dashboard", replace: true });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Something went wrong");
     } finally {
