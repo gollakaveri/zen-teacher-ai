@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedBookmarksRouteImport } from './routes/_authenticated/bookmarks'
 import { Route as AuthenticatedClassroomRouteImport } from './routes/_authenticated/classroom'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated/history'
 import { Route as AuthenticatedNotesRouteImport } from './routes/_authenticated/notes'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
@@ -42,6 +43,11 @@ const AuthenticatedClassroomRoute = AuthenticatedClassroomRouteImport.update({
   path: '/classroom',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedHistoryRoute = AuthenticatedHistoryRouteImport.update({
   id: '/history',
   path: '/history',
@@ -63,6 +69,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/bookmarks': typeof AuthenticatedBookmarksRoute
   '/classroom': typeof AuthenticatedClassroomRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/notes': typeof AuthenticatedNotesRoute
   '/profile': typeof AuthenticatedProfileRoute
@@ -72,6 +79,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/bookmarks': typeof AuthenticatedBookmarksRoute
   '/classroom': typeof AuthenticatedClassroomRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/notes': typeof AuthenticatedNotesRoute
   '/profile': typeof AuthenticatedProfileRoute
@@ -83,6 +91,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/bookmarks': typeof AuthenticatedBookmarksRoute
   '/_authenticated/classroom': typeof AuthenticatedClassroomRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/history': typeof AuthenticatedHistoryRoute
   '/_authenticated/notes': typeof AuthenticatedNotesRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
@@ -94,6 +103,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/bookmarks'
     | '/classroom'
+    | '/dashboard'
     | '/history'
     | '/notes'
     | '/profile'
@@ -103,6 +113,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/bookmarks'
     | '/classroom'
+    | '/dashboard'
     | '/history'
     | '/notes'
     | '/profile'
@@ -113,6 +124,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/bookmarks'
     | '/_authenticated/classroom'
+    | '/_authenticated/dashboard'
     | '/_authenticated/history'
     | '/_authenticated/notes'
     | '/_authenticated/profile'
@@ -161,6 +173,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClassroomRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/history': {
       id: '/_authenticated/history'
       path: '/history'
@@ -188,6 +207,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedBookmarksRoute: typeof AuthenticatedBookmarksRoute
   AuthenticatedClassroomRoute: typeof AuthenticatedClassroomRoute
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedHistoryRoute: typeof AuthenticatedHistoryRoute
   AuthenticatedNotesRoute: typeof AuthenticatedNotesRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
@@ -196,6 +216,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedBookmarksRoute: AuthenticatedBookmarksRoute,
   AuthenticatedClassroomRoute: AuthenticatedClassroomRoute,
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedHistoryRoute: AuthenticatedHistoryRoute,
   AuthenticatedNotesRoute: AuthenticatedNotesRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
