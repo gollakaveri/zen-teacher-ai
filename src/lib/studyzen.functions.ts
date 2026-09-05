@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { FREE_DAILY_QUESTIONS, type LanguageCode, type PlanState } from "@/lib/studyzen";
+import type { LanguageCode } from "@/lib/studyzen";
 
 const languageSchema = z.enum(["en", "te"]);
 const intentSchema = z.enum([
@@ -29,18 +29,6 @@ function today(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-function planStateOf(profile: ProfileRow): PlanState {
-  const trialActive = !!profile.trial_ends_at && new Date(profile.trial_ends_at).getTime() > Date.now();
-  const isPro = profile.plan === "pro" || (profile.plan === "trial" && trialActive);
-  const used = profile.questions_date === today() ? profile.questions_used : 0;
-  return {
-    plan: isPro ? (profile.plan === "pro" ? "pro" : "trial") : "free",
-    isPro,
-    questionsLeft: isPro ? Number.POSITIVE_INFINITY : Math.max(0, FREE_DAILY_QUESTIONS - used),
-    trialEndsAt: profile.trial_ends_at,
-  };
-}
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function loadProfile(supabase: any, userId: string): Promise<ProfileRow> {
   const { data, error } = await supabase.from("profiles").select("*").eq("id", userId).maybeSingle();
@@ -55,6 +43,33 @@ async function loadProfile(supabase: any, userId: string): Promise<ProfileRow> {
   return created as ProfileRow;
 }
 
+/** Learning progress shown on the dashboard and profile. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function learningStats(supabase: any, userId: string) {
+  const [{ data: lessons }, { data: notes }, { data: profile }] = await Promise.all([
+    supabase
+      .from("lessons")
+      .select("id, topic, subject, updated_at, turns")
+      .eq("user_id", userId)
+      .order("updated_at", { ascending: false })
+      .limit(10),
+    supabase.from("notes").select("id").eq("user_id", userId),
+    supabase.from("profiles").select("questions_used").eq("id", userId).maybeSingle(),
+  ]);
+  const rows = (lessons ?? []) as Record<string, unknown>[];
+  return {
+    topicsStudied: rows.length,
+    questionsAsked: (profile?.questions_used as number) ?? 0,
+    notesCount: (notes ?? []).length,
+    recent: rows.slice(0, 5).map((l) => ({
+      id: l["id"] as string,
+      topic: l["topic"] as string,
+      subject: (l["subject"] as string) ?? null,
+      updatedAt: l["updated_at"] as string,
+    })),
+  };
+}
+
 export const getAccount = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
@@ -64,7 +79,7 @@ export const getAccount = createServerFn({ method: "GET" })
         displayName: profile.display_name,
         language: (profile.language as LanguageCode) ?? "en",
       },
-      plan: planStateOf(profile),
+      stats: await learningStats(context.supabase, context.userId),
     };
   });
 
@@ -83,28 +98,6 @@ export const savePreferences = createServerFn({ method: "POST" })
     const { error } = await context.supabase.from("profiles").update(patch).eq("id", context.userId);
     if (error) throw new Error(error.message);
     return { ok: true };
-  });
-
-/**
- * INTEGRATION POINT — subscriptions.
- * No payment provider is connected yet, so this only records the *intent* to
- * start a trial / upgrade. Wire a real gateway (Stripe/Razorpay) webhook to
- * this same profile update before treating a plan as paid.
- */
-export const requestPlanChange = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ plan: z.enum(["trial", "pro"]) }).parse(d))
-  .handler(async ({ data, context }) => {
-    await loadProfile(context.supabase, context.userId);
-    return {
-      ok: false as const,
-      requiresPayment: true as const,
-      plan: data.plan,
-      message:
-        data.plan === "trial"
-          ? "Payments are not connected yet, so the ₹2 trial cannot be charged. Connect a payment provider to activate it."
-          : "Payments are not connected yet, so ₹100/month Pro cannot be charged. Connect a payment provider to activate it.",
-    };
   });
 
 export const teach = createServerFn({ method: "POST" })
@@ -127,13 +120,7 @@ export const teach = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { teachTurn, GatewayError } = await import("@/lib/teacher.server");
-    const profile = await loadProfile(context.supabase, context.userId);
-    const state = planStateOf(profile);
-    const isNewQuestion = data.intent === "new_question";
-
-    if (isNewQuestion && !state.isPro && state.questionsLeft <= 0) {
-      return { blocked: true as const, plan: state };
-    }
+    await loadProfile(context.supabase, context.userId);
 
     let turn;
     try {
@@ -152,16 +139,20 @@ export const teach = createServerFn({ method: "POST" })
       throw error;
     }
 
-    let plan = state;
-    if (isNewQuestion && !state.isPro) {
-      const used = profile.questions_date === today() ? profile.questions_used + 1 : 1;
-      const { error } = await context.supabase
-        .from("profiles")
-        .update({ questions_used: used, questions_date: today(), updated_at: new Date().toISOString() })
-        .eq("id", context.userId);
-      if (error) console.error("[studyzen] counter update failed", error.message);
-      plan = { ...state, questionsLeft: Math.max(0, FREE_DAILY_QUESTIONS - used) };
-    }
+    // Everything is free: we only keep a lifetime counter for the progress cards.
+    const { data: counted } = await context.supabase
+      .from("profiles")
+      .select("questions_used")
+      .eq("id", context.userId)
+      .maybeSingle();
+    await context.supabase
+      .from("profiles")
+      .update({
+        questions_used: ((counted?.questions_used as number) ?? 0) + 1,
+        questions_date: today(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", context.userId);
 
     // Persist lesson history.
     let lessonId = data.lessonId ?? null;
@@ -196,7 +187,7 @@ export const teach = createServerFn({ method: "POST" })
       if (error) console.error("[studyzen] lesson update failed", error.message);
     }
 
-    return { blocked: false as const, turn, plan, lessonId };
+    return { turn, lessonId };
   });
 
 export const speakText = createServerFn({ method: "POST" })
@@ -224,8 +215,6 @@ export const makeNotes = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ lessonId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { generateNotes } = await import("@/lib/teacher.server");
-    const profile = await loadProfile(context.supabase, context.userId);
-    const state = planStateOf(profile);
 
     const { data: lesson, error } = await context.supabase
       .from("lessons")
@@ -258,7 +247,7 @@ export const makeNotes = createServerFn({ method: "POST" })
       .single();
     if (saveError) throw new Error(saveError.message);
 
-    return { blocked: false as const, notes, id: saved.id as string };
+    return { notes, id: saved.id as string };
   });
 
 export const listLessons = createServerFn({ method: "GET" })

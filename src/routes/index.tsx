@@ -37,7 +37,7 @@ function Landing() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && session) navigate({ to: "/classroom", replace: true });
+    if (!loading && session) navigate({ to: "/dashboard", replace: true });
   }, [session, loading, navigate]);
 
   return (
@@ -68,7 +68,7 @@ function Landing() {
               </Button>
             </div>
             <p className="mt-3 text-xs text-muted-foreground">
-              3 free questions daily · Pro ₹100/month · Try Pro for 2 days — ₹2
+              Every feature is free — unlimited questions, voice, board and notes.
             </p>
           </div>
           <img

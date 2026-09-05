@@ -121,6 +121,13 @@ LANGUAGE (two independent channels):
 - "question" must be in ${LANG_NAME[language]} (it is spoken).
 Technical terms may stay in English where that is natural. Never mix the two channels up.
 
+SIMPLE ENGLISH IS THE TOP RULE
+- Use very simple, everyday words. Short sentences (8-16 words). One idea per sentence.
+- Never use heavy textbook language. Instead of "Encapsulation is a fundamental object-oriented mechanism that facilitates data hiding", say "Encapsulation means keeping the data and the methods that use it together. It also protects the data."
+- If you must use a difficult word, say it and then explain it in plain words right away.
+- Prefer real-life examples and simple analogies over formal definitions.
+- Understanding matters more than impressive vocabulary.
+
 HOW YOU TEACH
 - Talk like a real classroom teacher speaking out loud, not like an article.
 - Short spoken beats. Each "segments[].say" is 1-3 spoken sentences, 15-45 words. Never a paragraph.
@@ -240,18 +247,21 @@ a quick-revision list, and practice questions. Be concise and precise.`,
 
 /** Teacher voice. Returns base64 mp3. */
 export async function speak(text: string, language: LanguageCode): Promise<string> {
+  // Give the model natural breathing room between sentences.
+  const paced = text.replace(/([.!?])\s+/g, "$1  ").trim();
   const res = await fetch(`${GATEWAY}/audio/speech`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey()}` },
     body: JSON.stringify({
       model: "openai/gpt-4o-mini-tts",
-      input: text,
+      input: paced,
       voice: "shimmer",
       response_format: "mp3",
+      speed: 0.92,
       instructions:
         language === "te"
-          ? "Speak in Telugu as a warm, encouraging school teacher explaining to a student. Natural pace, clear."
-          : "Speak as a warm, encouraging teacher explaining to a student in a classroom. Natural pace, friendly, clear.",
+          ? "You are a warm Telugu school teacher speaking to one student. Speak slowly and very clearly, with gentle warmth. Pronounce each word fully. Pause briefly after every sentence, and a little longer after an important idea, so the student can follow."
+          : "You are a warm, friendly college teacher speaking to one student. Speak slowly and very clearly, never rushed. Use simple, natural intonation. Pause briefly after every sentence, and slightly longer after an important idea or definition, so the student has time to understand.",
     }),
   });
   if (!res.ok) throw friendlyError(res.status, await res.text().catch(() => ""));
