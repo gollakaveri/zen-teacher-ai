@@ -1,7 +1,7 @@
-import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
+import { createFileRoute, useSearch } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Bookmark, Crown, Mic, NotebookPen, Send, Square } from "lucide-react";
+import { Bookmark, Mic, NotebookPen, Send, Square } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -12,10 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/hooks/useLanguage";
 import {
-  FREE_DAILY_QUESTIONS,
   QUICK_ACTIONS,
   type BoardItem,
-  type PlanState,
   type StudentIntent,
   type TeachingTurn,
 } from "@/lib/studyzen";
@@ -74,8 +72,6 @@ function Classroom() {
   const [bookmarked, setBookmarked] = useState(false);
   const [history, setHistory] = useState<ChatLine[]>([]);
   const [input, setInput] = useState("");
-  const [blocked, setBlocked] = useState(false);
-  const [plan, setPlan] = useState<PlanState | null>(null);
   const [recording, setRecording] = useState(false);
   const [pointing, setPointing] = useState(false);
   const [notesBusy, setNotesBusy] = useState(false);
@@ -239,13 +235,6 @@ function Classroom() {
           },
         });
 
-        if (result.blocked) {
-          setPlan(result.plan);
-          setBlocked(true);
-          setState("idle");
-          return;
-        }
-        setPlan(result.plan);
         setLessonId(result.lessonId ?? null);
         setHistory((h) => [...h, { role: "teacher", text: result.turn.segments.map((s) => s.say).join(" ") }]);
         void queryClient.invalidateQueries({ queryKey: ["account"] });
@@ -307,11 +296,7 @@ function Classroom() {
     if (!lessonId) return;
     setNotesBusy(true);
     try {
-      const result = await notesFn({ data: { lessonId } });
-      if (result.blocked) {
-        toast.error("Notes Generator is a Pro feature.");
-        return;
-      }
+      await notesFn({ data: { lessonId } });
       void queryClient.invalidateQueries({ queryKey: ["notes"] });
       toast.success("Study notes are ready in the Notes page.");
     } catch (error) {
@@ -347,22 +332,6 @@ function Classroom() {
           pointing={pointing}
         />
 
-        {blocked ? (
-          <div className="glass-card rounded-3xl border-gold/40 p-5 text-center">
-            <Crown className="mx-auto size-6 text-gold" />
-            <h3 className="mt-2 font-semibold">
-              {language === "te" ? "ఈరోజు ఉచిత ప్రశ్నలు అయిపోయాయి" : "Daily free questions used"}
-            </h3>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {language === "te"
-                ? `ఉచిత ప్లాన్‌లో రోజుకు ${FREE_DAILY_QUESTIONS} ప్రశ్నలు. అపరిమిత బోధన కోసం ప్రో తీసుకోండి.`
-                : `Free plan includes ${FREE_DAILY_QUESTIONS} questions per day. Go Pro for unlimited teaching.`}
-            </p>
-            <Button asChild className="mt-4 w-full">
-              <Link to="/pro">Try StudyZen Pro for ₹2</Link>
-            </Button>
-          </div>
-        ) : null}
       </div>
 
       <div className="flex flex-col gap-4">
@@ -426,11 +395,9 @@ function Classroom() {
               </button>
             ) : (
               <span>
-                {plan && !plan.isPro
-                  ? `${plan.questionsLeft}/${FREE_DAILY_QUESTIONS} ${language === "te" ? "ప్రశ్నలు మిగిలాయి" : "questions left today"}`
-                  : language === "te"
-                    ? "మాట్లాడండి లేదా టైప్ చేయండి"
-                    : "Tap to speak or type — no subject selection needed"}
+                {language === "te"
+                  ? "మాట్లాడండి లేదా టైప్ చేయండి"
+                  : "Tap to speak or type — no subject selection needed"}
               </span>
             )}
             <div className="flex items-center gap-4">

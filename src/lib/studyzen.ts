@@ -58,15 +58,6 @@ export type StudyNotes = {
   practice: string[];
 };
 
-export type PlanState = {
-  plan: "free" | "trial" | "pro";
-  isPro: boolean;
-  questionsLeft: number;
-  trialEndsAt: string | null;
-};
-
-export const FREE_DAILY_QUESTIONS = 5;
-
 export type StudentIntent =
   | "new_question"
   | "answer"
