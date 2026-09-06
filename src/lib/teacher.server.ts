@@ -231,7 +231,16 @@ export async function generateNotes(input: {
         content: `You write clean, exam-ready study notes in ${LANG_NAME[input.language]}.
 Never copy the teacher's spoken conversation. Rewrite everything as proper structured study material:
 crisp definitions, key points, worked examples, formulas (empty array if none), a step/flow outline,
-a quick-revision list, and practice questions. Be concise and precise.`,
+a quick-revision list, and practice questions. Be concise and precise.
+${
+  input.language === "te"
+    ? `Write the explanations in natural, easy Telugu that a college student reads comfortably.
+KEEP these in English exactly as they are: programming keywords and code, technical terms and product names
+(Java, class, object, inheritance, encapsulation, API, database, SQL, HTTP...), formulas, symbols and units.
+Never translate code. Never transliterate a technical term if that makes it confusing.`
+    : `Write in simple English: easy vocabulary, short sentences, clear bullet points, and a real-life example
+where it helps. A first-year college student must understand it without a dictionary.`
+}`,
       },
       {
         role: "user",

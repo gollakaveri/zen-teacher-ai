@@ -1,4 +1,4 @@
-import logo from "@/assets/studyzen-logo.png.asset.json";
+import logo from "@/assets/studyzen-logo-official.png.asset.json";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -19,7 +19,7 @@ export function Logo({ size = 44, className, withWordmark = false, priority = fa
         height={size}
         loading={priority ? "eager" : "lazy"}
         style={{ width: size, height: size }}
-        className="rounded-2xl object-cover object-center shadow-[0_10px_30px_-12px_rgba(0,0,0,0.8)]"
+        className="rounded-2xl object-contain object-center shadow-[0_10px_30px_-12px_rgba(0,0,0,0.8)]"
       />
       {withWordmark ? (
         <span className="flex flex-col leading-tight">

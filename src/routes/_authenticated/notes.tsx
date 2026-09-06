@@ -69,7 +69,8 @@ function NotesPage() {
               <header>
                 <h2 className="text-lg font-semibold">{c.topic || n.topic}</h2>
                 <p className="text-xs text-muted-foreground">
-                  {new Date(n.createdAt).toLocaleString()} · {n.language.toUpperCase()}
+                  {new Date(n.createdAt).toLocaleString()} ·{" "}
+                  {n.language === "te" ? "తెలుగులో Notes రూపొందించబడ్డాయి" : "Notes generated in English"}
                 </p>
               </header>
               <p className="text-sm">{c.summary}</p>
