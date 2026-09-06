@@ -34,3 +34,8 @@
 - [ ] Student dashboard (welcome, continue learning, stats, recent activity)
 - [ ] New professional StudyZen logo + favicon everywhere
 - [ ] Consistent design, loading + error states, full journey test
+
+## Sep 6 requests
+- [ ] Use the exact uploaded StudyZen logo everywhere (navbar, auth, dashboard, profile, loading, favicon); no redesign
+- [ ] Fix Continue with Google sign-in (redirect to dashboard, session persists, friendly errors)
+- [ ] Notes language selector (English / తెలుగు) applied only to notes generation
