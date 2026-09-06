@@ -12,8 +12,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/hooks/useLanguage";
 import {
+  LANGUAGES,
   QUICK_ACTIONS,
   type BoardItem,
+  type LanguageCode,
   type StudentIntent,
   type TeachingTurn,
 } from "@/lib/studyzen";
@@ -25,6 +27,8 @@ import {
   toggleBookmark,
   transcribeSpeech,
 } from "@/lib/studyzen.functions";
+import { cn } from "@/lib/utils";
+
 
 export const Route = createFileRoute("/_authenticated/classroom")({
   validateSearch: z.object({ lesson: z.string().uuid().optional() }),
