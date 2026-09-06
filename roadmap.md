@@ -22,20 +22,20 @@
 - [x] Notes free for everyone (Pro lock removed)
 
 ## New brief (Sep 5) — professional pass
-- [ ] Remove Pro/premium everywhere (badges, upgrade pages, trial, daily limits)
+- [x] Remove Pro/premium everywhere (badges, upgrade pages, trial, daily limits)
 - [ ] Beautiful, professional AI teacher character (same identity everywhere)
 - [ ] Natural, non-random teacher animation (mouth, blink, head, hands, pointing)
-- [ ] Clearer, slower, well-paced teacher voice with pauses
-- [ ] Simple English teaching style
+- [x] Clearer, slower, well-paced teacher voice with pauses
+- [x] Simple English teaching style
 - [ ] Cleaner digital board (short points, keywords, formulas, code, diagrams)
 - [ ] Teacher left / board right balanced layout, responsive
 - [ ] Fix and harden login/signup/logout, session persistence, friendly errors
-- [ ] Complete profile page (avatar, edit, password, progress, activity, logout)
-- [ ] Student dashboard (welcome, continue learning, stats, recent activity)
+- [x] Complete profile page (avatar, edit, password, progress, activity, logout)
+- [x] Student dashboard (welcome, continue learning, stats, recent activity)
 - [ ] New professional StudyZen logo + favicon everywhere
 - [ ] Consistent design, loading + error states, full journey test
 
 ## Sep 6 requests
-- [ ] Use the exact uploaded StudyZen logo everywhere (navbar, auth, dashboard, profile, loading, favicon); no redesign
-- [ ] Fix Continue with Google sign-in (redirect to dashboard, session persists, friendly errors)
-- [ ] Notes language selector (English / తెలుగు) applied only to notes generation
+- [x] Use the exact uploaded StudyZen logo everywhere (navbar, auth, dashboard, profile, loading, favicon); no redesign
+- [x] Fix Continue with Google sign-in (redirect to dashboard, session persists, friendly errors)
+- [x] Notes language selector (English / తెలుగు) applied only to notes generation
