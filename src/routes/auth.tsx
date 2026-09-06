@@ -34,6 +34,7 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
+  const [googleBusy, setGoogleBusy] = useState(false);
   const { session, loading } = useAuth();
   const navigate = useNavigate();
 
@@ -41,8 +42,28 @@ function AuthPage() {
     if (!loading && session) navigate({ to: "/dashboard", replace: true });
   }, [session, loading, navigate]);
 
+  function friendly(message: string): string {
+    const m = message.toLowerCase();
+    if (m.includes("invalid login credentials")) return "That email or password is not correct.";
+    if (m.includes("email not confirmed")) return "Please confirm your email first, then log in.";
+    if (m.includes("already registered") || m.includes("already been registered"))
+      return "An account with this email already exists. Please log in instead.";
+    if (m.includes("password")) return "Please use a password with at least 6 characters.";
+    if (m.includes("valid email") || m.includes("invalid email")) return "Please enter a valid email address.";
+    if (m.includes("rate limit") || m.includes("too many")) return "Too many attempts. Please wait a minute and try again.";
+    return "Something went wrong. Please try again.";
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (!email.trim() || !password) {
+      toast.error("Please enter your email and password.");
+      return;
+    }
+    if (mode === "signup" && !name.trim()) {
+      toast.error("Please enter your name.");
+      return;
+    }
     setBusy(true);
     try {
       if (mode === "signup") {
@@ -62,17 +83,29 @@ function AuthPage() {
       }
       navigate({ to: "/dashboard", replace: true });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Something went wrong");
+      toast.error(friendly(error instanceof Error ? error.message : ""));
     } finally {
       setBusy(false);
     }
   }
 
   async function google() {
+    setGoogleBusy(true);
     try {
-      await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Google sign-in failed");
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) {
+        toast.error("Google sign-in failed. Please try again.");
+        return;
+      }
+      if (result.redirected) return; // browser is navigating to Google
+      // Session is set by the helper — go to the dashboard.
+      navigate({ to: "/dashboard", replace: true });
+    } catch {
+      toast.error("Google sign-in failed. Please try again.");
+    } finally {
+      setGoogleBusy(false);
     }
   }
 
@@ -80,7 +113,7 @@ function AuthPage() {
     <div className="flex min-h-screen items-center justify-center px-4 py-10">
       <div className="glass-card w-full max-w-md rounded-3xl p-7">
         <Link to="/" className="mb-6 flex justify-center">
-          <Logo size={64} withWordmark priority />
+          <Logo size={88} priority />
         </Link>
         <h1 className="text-center text-2xl font-semibold">
           {mode === "login" ? "Welcome back" : "Create your account"}
@@ -128,8 +161,8 @@ function AuthPage() {
           <span className="h-px flex-1 bg-border" /> or <span className="h-px flex-1 bg-border" />
         </div>
 
-        <Button variant="secondary" className="w-full" onClick={google}>
-          Continue with Google
+        <Button variant="secondary" className="w-full" disabled={googleBusy} onClick={() => void google()}>
+          {googleBusy ? "Opening Google…" : "Continue with Google"}
         </Button>
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
