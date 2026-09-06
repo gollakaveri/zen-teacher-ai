@@ -212,7 +212,9 @@ export const transcribeSpeech = createServerFn({ method: "POST" })
 
 export const makeNotes = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ lessonId: z.string().uuid() }).parse(d))
+  .inputValidator((d: unknown) =>
+    z.object({ lessonId: z.string().uuid(), notesLanguage: languageSchema.optional() }).parse(d),
+  )
   .handler(async ({ data, context }) => {
     const { generateNotes } = await import("@/lib/teacher.server");
 
@@ -228,9 +230,10 @@ export const makeNotes = createServerFn({ method: "POST" })
       .map((t) => `${t?.role ?? ""}: ${t?.text ?? ""}`)
       .join("\n");
 
+    const notesLanguage: LanguageCode = data.notesLanguage ?? ((lesson.language as LanguageCode) || "en");
     const notes = await generateNotes({
       topic: lesson.topic,
-      language: (lesson.language as LanguageCode) ?? "en",
+      language: notesLanguage,
       lessonSummary: transcript,
     });
 
@@ -240,7 +243,7 @@ export const makeNotes = createServerFn({ method: "POST" })
         user_id: context.userId,
         lesson_id: lesson.id,
         topic: lesson.topic,
-        language: lesson.language,
+        language: notesLanguage,
         content: notes,
       })
       .select("id")

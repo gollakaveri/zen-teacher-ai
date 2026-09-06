@@ -57,6 +57,7 @@ function Classroom() {
   const speakFn = useServerFn(speakText);
   const transcribeFn = useServerFn(transcribeSpeech);
   const notesFn = useServerFn(makeNotes);
+  const [notesLanguage, setNotesLanguage] = useState<LanguageCode>("en");
   const getLessonFn = useServerFn(getLesson);
   const bookmarkFn = useServerFn(toggleBookmark);
 
@@ -296,9 +297,13 @@ function Classroom() {
     if (!lessonId) return;
     setNotesBusy(true);
     try {
-      await notesFn({ data: { lessonId } });
+      await notesFn({ data: { lessonId, notesLanguage } });
       void queryClient.invalidateQueries({ queryKey: ["notes"] });
-      toast.success("Study notes are ready in the Notes page.");
+      toast.success(
+        notesLanguage === "te"
+          ? "తెలుగులో Notes రూపొందించబడ్డాయి — Notes పేజీలో చూడండి."
+          : "Notes generated in English — open the Notes page.",
+      );
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Could not make notes.");
     } finally {
@@ -409,6 +414,27 @@ function Classroom() {
                 <Bookmark className={bookmarked ? "size-3.5 fill-gold text-gold" : "size-3.5"} />
                 {bookmarked ? "Bookmarked" : "Bookmark"}
               </button>
+              <div className="flex items-center gap-1.5">
+                <span className="hidden text-[10px] uppercase tracking-wider text-muted-foreground sm:inline">
+                  Notes language
+                </span>
+                <div className="flex rounded-full border border-border/70 p-0.5">
+                  {LANGUAGES.map((l) => (
+                    <button
+                      key={l.code}
+                      onClick={() => setNotesLanguage(l.code)}
+                      className={cn(
+                        "rounded-full px-2 py-0.5 text-[11px] transition-colors",
+                        notesLanguage === l.code
+                          ? "bg-primary text-primary-foreground"
+                          : "text-muted-foreground hover:text-foreground",
+                      )}
+                    >
+                      {l.code === "en" ? "English" : "తెలుగు"}
+                    </button>
+                  ))}
+                </div>
+              </div>
               <button
                 className="inline-flex items-center gap-1.5 disabled:opacity-40"
                 disabled={!lessonId || notesBusy}
