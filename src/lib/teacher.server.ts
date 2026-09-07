@@ -43,15 +43,107 @@ async function chatJson<T>(body: Record<string, unknown>): Promise<T> {
 
 const LANG_NAME: Record<LanguageCode, string> = { en: "English", te: "Telugu (తెలుగు)" };
 
+const visualSchema = {
+  type: "object",
+  additionalProperties: false,
+  required: ["kind", "title", "caption", "nodes", "edges", "table", "chart"],
+  properties: {
+    kind: {
+      type: "string",
+      enum: [
+        "none",
+        "flowchart",
+        "concept",
+        "cycle",
+        "state",
+        "tree",
+        "architecture",
+        "labeled",
+        "table",
+        "graph",
+      ],
+    },
+    title: { type: "string" },
+    caption: { type: "string" },
+    nodes: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["id", "label", "shape", "x", "y"],
+        properties: {
+          id: { type: "string" },
+          label: { type: "string" },
+          shape: { type: "string", enum: ["box", "rounded", "circle", "double", "diamond", "text"] },
+          x: { type: "number" },
+          y: { type: "number" },
+        },
+      },
+    },
+    edges: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["from", "to", "label", "dashed"],
+        properties: {
+          from: { type: "string" },
+          to: { type: "string" },
+          label: { type: "string" },
+          dashed: { type: "boolean" },
+        },
+      },
+    },
+    table: {
+      type: "object",
+      additionalProperties: false,
+      required: ["headers", "rows"],
+      properties: {
+        headers: { type: "array", items: { type: "string" } },
+        rows: { type: "array", items: { type: "array", items: { type: "string" } } },
+      },
+    },
+    chart: {
+      type: "object",
+      additionalProperties: false,
+      required: ["xLabel", "yLabel", "points"],
+      properties: {
+        xLabel: { type: "string" },
+        yLabel: { type: "string" },
+        points: {
+          type: "array",
+          items: {
+            type: "object",
+            additionalProperties: false,
+            required: ["x", "y"],
+            properties: { x: { type: "number" }, y: { type: "number" } },
+          },
+        },
+      },
+    },
+  },
+} as const;
+
 const turnSchema = {
   type: "object",
   additionalProperties: false,
-  required: ["subject", "topic", "level", "boardTitle", "segments", "question", "expectsAnswer", "nextAction"],
+  required: [
+    "subject",
+    "topic",
+    "level",
+    "boardTitle",
+    "visual",
+    "segments",
+    "question",
+    "expectsAnswer",
+    "nextAction",
+  ],
   properties: {
     subject: { type: "string" },
     topic: { type: "string" },
     level: { type: "string" },
     boardTitle: { type: "string" },
+    visual: visualSchema,
     segments: {
       type: "array",
       minItems: 3,
@@ -59,9 +151,11 @@ const turnSchema = {
       items: {
         type: "object",
         additionalProperties: false,
-        required: ["say", "board"],
+        required: ["say", "board", "reveal", "highlight"],
         properties: {
           say: { type: "string" },
+          reveal: { type: "array", items: { type: "string" } },
+          highlight: { type: "array", items: { type: "string" } },
           board: {
             type: "array",
             items: {
@@ -144,6 +238,22 @@ THE BOARD
 - Whenever the topic has a process, cause-effect chain or pipeline, write it as a sequence of "flow" items so the board shows a real flowchart (e.g. "Massive star" -> "Fuel runs out" -> "Core collapses" -> "Explosion").
 - Match the board to the subject: maths -> formula + steps; programming -> logic/flow; science -> process flow + labelled parts; databases -> table/relationship lines; networking -> simple node flow; economics -> example numbers.
 
+THE DIAGRAM ("visual") — the teacher DRAWS, she does not only write
+- Choose the ONE diagram type that truly explains this topic, and set "kind":
+  flowchart (process/algorithm/steps), concept (idea and its parts), cycle (repeating loop like water cycle or SDLC),
+  state (automata, transitions, lifecycle), tree (hierarchy, family/binary tree, class hierarchy, folder structure),
+  architecture (client-server, layers, components, network), labeled (a real object with named parts: cell, heart, engine, CPU),
+  table (comparison / differences / truth table), graph (maths curve, physics or economics graph).
+  Use "none" ONLY when the topic genuinely has nothing to draw.
+- Place nodes yourself on a 0-100 canvas ("x" left-right, "y" top-bottom). Keep 18+ units between node centres, keep 6-94 margins,
+  and lay them out the way a teacher would: top-to-bottom for flow, ring for cycle, level-by-level for tree, left-to-right for architecture.
+- Node labels are 1-4 words. Shapes: box (step/part), rounded (start/end), circle (state/node), double (final state), diamond (decision), text (a label only).
+- Edges connect node ids; "label" is "" when not needed (use it for yes/no, transition symbols, relationships), "dashed" for weak/optional links.
+- For kind "table" fill "table" (headers + rows) and leave nodes/edges empty. For "graph" fill "chart" (points in 0-100) and leave nodes/edges empty.
+- Always send every field: unused ones are empty arrays / empty strings.
+- Teach the diagram piece by piece: each segment lists in "reveal" the node ids drawn while you say that beat, and in "highlight" the ids you are pointing at.
+  Every node must be revealed by exactly one segment, in teaching order. Mention what you draw in the spoken words.
+
 TURN INTENT: ${INTENT_RULES[intent]}
 
 Never repeat an explanation you already gave in this lesson. Keep the whole turn under ~180 spoken words.`;
@@ -179,7 +289,18 @@ export async function teachTurn(input: {
 
   return {
     ...turn,
-    segments: (turn.segments ?? []).filter((s) => s.say?.trim()).map((s) => ({ ...s, board: s.board ?? [] })),
+    visual: turn.visual ?? {
+      kind: "none",
+      title: "",
+      caption: "",
+      nodes: [],
+      edges: [],
+      table: { headers: [], rows: [] },
+      chart: { xLabel: "", yLabel: "", points: [] },
+    },
+    segments: (turn.segments ?? [])
+      .filter((s) => s.say?.trim())
+      .map((s) => ({ ...s, board: s.board ?? [], reveal: s.reveal ?? [], highlight: s.highlight ?? [] })),
   };
 }
 
@@ -196,6 +317,7 @@ const notesSchema = {
     "flow",
     "revision",
     "practice",
+    "diagrams",
   ],
   properties: {
     topic: { type: "string" },
@@ -215,6 +337,7 @@ const notesSchema = {
     flow: { type: "array", items: { type: "string" } },
     revision: { type: "array", items: { type: "string" } },
     practice: { type: "array", items: { type: "string" } },
+    diagrams: { type: "array", items: visualSchema },
   },
 } as const;
 
@@ -232,6 +355,11 @@ export async function generateNotes(input: {
 Never copy the teacher's spoken conversation. Rewrite everything as proper structured study material:
 crisp definitions, key points, worked examples, formulas (empty array if none), a step/flow outline,
 a quick-revision list, and practice questions. Be concise and precise.
+Add 1-3 exam-style DIAGRAMS in "diagrams" whenever the topic can be drawn (process, comparison table, hierarchy,
+labelled object, architecture, cycle, state machine, graph). Each diagram uses the same structure as the classroom board:
+pick "kind", place nodes on a 0-100 canvas with 18+ units between centres, 1-4 word labels, connect them with edges,
+use "table" for comparisons and "chart" for graphs, and give a one-line "caption" that says what the diagram shows.
+Send every field; leave unused ones empty. Use an empty "diagrams" array only when nothing is worth drawing.
 ${
   input.language === "te"
     ? `Write the explanations in natural, easy Telugu that a college student reads comfortably.

@@ -386,3 +386,11 @@ export const clearHistory = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+export const clearNotes = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { error } = await context.supabase.from("notes").delete().eq("user_id", context.userId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });

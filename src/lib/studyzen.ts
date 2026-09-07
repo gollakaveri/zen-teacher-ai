@@ -22,10 +22,67 @@ export type BoardItem = {
   text: string;
 };
 
+export type VisualShape = "box" | "rounded" | "circle" | "double" | "diamond" | "text";
+
+export type VisualNode = {
+  id: string;
+  label: string;
+  shape: VisualShape;
+  /** 0-100 coordinate space, top-left origin. */
+  x: number;
+  y: number;
+};
+
+export type VisualEdge = {
+  from: string;
+  to: string;
+  label: string;
+  dashed: boolean;
+};
+
+export type VisualTable = {
+  headers: string[];
+  rows: string[][];
+};
+
+export type VisualChart = {
+  xLabel: string;
+  yLabel: string;
+  /** Simple line/curve series in 0-100 space. */
+  points: { x: number; y: number }[];
+};
+
+export type BoardVisualKind =
+  | "none"
+  | "flowchart"
+  | "concept"
+  | "cycle"
+  | "state"
+  | "tree"
+  | "architecture"
+  | "labeled"
+  | "table"
+  | "graph";
+
+/** The single diagram the teacher draws on the board for this turn. */
+export type BoardVisual = {
+  kind: BoardVisualKind;
+  title: string;
+  caption: string;
+  nodes: VisualNode[];
+  edges: VisualEdge[];
+  table: VisualTable;
+  chart: VisualChart;
+};
+
 /** One spoken beat of the lesson. The board reveals `board` while `say` is spoken. */
 export type TeachingSegment = {
   say: string;
   board: BoardItem[];
+  /** Diagram node ids drawn during this beat. */
+  reveal: string[];
+  /** Diagram node ids the teacher points at during this beat. */
+  highlight: string[];
 };
 
 export type TeachingTurn = {
@@ -33,6 +90,7 @@ export type TeachingTurn = {
   topic: string;
   level: string;
   boardTitle: string;
+  visual: BoardVisual;
   segments: TeachingSegment[];
   question: string;
   expectsAnswer: boolean;
@@ -56,6 +114,7 @@ export type StudyNotes = {
   flow: string[];
   revision: string[];
   practice: string[];
+  diagrams: BoardVisual[];
 };
 
 export type StudentIntent =
