@@ -39,3 +39,15 @@
 - [x] Use the exact uploaded StudyZen logo everywhere (navbar, auth, dashboard, profile, loading, favicon); no redesign
 - [x] Fix Continue with Google sign-in (redirect to dashboard, session persists, friendly errors)
 - [x] Notes language selector (English / తెలుగు) applied only to notes generation
+
+## Sep 7 requests
+- [ ] Logout in Profile with confirm dialog -> sign in page (keep data)
+- [ ] Delete per note + Clear all notes (confirm)
+- [ ] Delete/remove bookmarks (confirm)
+- [ ] Delete per history item + Clear history (confirm)
+- [ ] Password eye toggle on sign in / sign up
+- [ ] Smart board: AI picks visual type (diagram, state diagram, table, graph, cycle, etc.), not always flowchart
+- [ ] Teacher pointer/highlight follows the part being explained
+- [ ] Subject-specific visuals (DFA/ER/OSI/plant/circuit/graphs)
+- [ ] Progressive board drawing
+- [ ] Notes include diagrams + exam-oriented structure
