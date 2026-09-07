@@ -5,6 +5,7 @@ import { LogOut } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import { ConfirmDialog } from "@/components/studyzen/ConfirmDialog";
 import { useAccount } from "@/components/studyzen/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -200,9 +201,17 @@ function ProfilePage() {
         )}
       </section>
 
-      <Button variant="ghost" className="w-full" onClick={() => void handleSignOut()}>
-        <LogOut className="mr-2 size-4" /> Log out
-      </Button>
+      <ConfirmDialog
+        title="Are you sure you want to logout?"
+        description="Your notes, bookmarks and history stay saved in your account."
+        confirmLabel="Logout"
+        onConfirm={handleSignOut}
+        trigger={
+          <Button variant="ghost" className="w-full" aria-label="Log out of StudyZen">
+            <LogOut className="mr-2 size-4" /> Log out
+          </Button>
+        }
+      />
     </div>
   );
 }
