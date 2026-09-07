@@ -9,7 +9,7 @@ import { ConfirmDialog } from "@/components/studyzen/ConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/hooks/useLanguage";
 import type { StudyNotes } from "@/lib/studyzen";
-import { deleteNote, listNotes } from "@/lib/studyzen.functions";
+import { clearNotes, deleteNote, listNotes } from "@/lib/studyzen.functions";
 
 export const Route = createFileRoute("/_authenticated/notes")({
   head: () => ({
@@ -56,12 +56,37 @@ function NotesPage() {
     },
     onError: () => toast.error("Could not delete this note. Please try again."),
   });
+  const clearAllFn = useServerFn(clearNotes);
+  const clearAll = useMutation({
+    mutationFn: () => clearAllFn(),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["notes"] });
+      void queryClient.invalidateQueries({ queryKey: ["account"] });
+      toast.success("All notes deleted.");
+    },
+    onError: () => toast.error("Could not clear your notes. Please try again."),
+  });
 
   if (account.isLoading) return <p className="text-sm text-muted-foreground">Loading…</p>;
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">{language === "te" ? "నా నోట్స్" : "My study notes"}</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-2xl font-semibold">{language === "te" ? "నా నోట్స్" : "My study notes"}</h1>
+        {notes.data?.length ? (
+          <ConfirmDialog
+            title="Delete all notes?"
+            description="Every saved note will be permanently removed. Your lessons stay in history."
+            confirmLabel="Delete all"
+            onConfirm={() => clearAll.mutate()}
+            trigger={
+              <Button variant="secondary" size="sm" aria-label="Delete all saved notes">
+                <Trash2 className="mr-2 size-4" /> Clear all notes
+              </Button>
+            }
+          />
+        ) : null}
+      </div>
       {notes.isLoading ? <p className="text-sm text-muted-foreground">Loading…</p> : null}
       {notes.data?.length === 0 ? (
         <div className="glass-card rounded-3xl p-8 text-center">
