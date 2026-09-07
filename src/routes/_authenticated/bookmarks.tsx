@@ -1,11 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Bookmark } from "lucide-react";
+import { Bookmark, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
+import { ConfirmDialog } from "@/components/studyzen/ConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/hooks/useLanguage";
-import { listBookmarks } from "@/lib/studyzen.functions";
+import { listBookmarks, toggleBookmark } from "@/lib/studyzen.functions";
 
 export const Route = createFileRoute("/_authenticated/bookmarks")({
   head: () => ({
@@ -23,6 +25,16 @@ function BookmarksPage() {
   const { language } = useLanguage();
   const fn = useServerFn(listBookmarks);
   const bookmarks = useQuery({ queryKey: ["bookmarks"], queryFn: () => fn() });
+  const toggleFn = useServerFn(toggleBookmark);
+  const queryClient = useQueryClient();
+  const remove = useMutation({
+    mutationFn: (lessonId: string) => toggleFn({ data: { lessonId, value: false } }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
+      toast.success("Bookmark removed.");
+    },
+    onError: () => toast.error("Could not remove this bookmark. Please try again."),
+  });
 
   return (
     <div className="space-y-4">
@@ -44,8 +56,33 @@ function BookmarksPage() {
       <div className="grid gap-3 md:grid-cols-2">
         {bookmarks.data?.map((lesson) => (
           <div key={lesson.id} className="glass-card rounded-2xl p-4">
-            <p className="text-xs uppercase tracking-wider text-gold">{lesson.subject ?? "Lesson"}</p>
-            <h2 className="mt-1 font-semibold">{lesson.topic}</h2>
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-xs uppercase tracking-wider text-gold">{lesson.subject ?? "Lesson"}</p>
+                <h2 className="mt-1 font-semibold">{lesson.topic}</h2>
+              </div>
+              <ConfirmDialog
+                title={language === "te" ? "బుక్‌మార్క్ తీసివేయాలా?" : "Remove this bookmark?"}
+                description={
+                  language === "te"
+                    ? "పాఠం మీ హిస్టరీలో ఉంటుంది."
+                    : "The lesson itself stays in your history."
+                }
+                confirmLabel={language === "te" ? "తీసివేయి" : "Remove"}
+                onConfirm={() => remove.mutate(lesson.id)}
+                trigger={
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label={`Remove bookmark ${lesson.topic}`}
+                    title="Remove bookmark"
+                    className="shrink-0 text-muted-foreground hover:text-destructive"
+                  >
+                    <Trash2 className="size-4" />
+                  </Button>
+                }
+              />
+            </div>
             <p className="mt-1 text-xs text-muted-foreground">
               {new Date(lesson.updatedAt).toLocaleString()}
             </p>
